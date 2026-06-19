@@ -3,5 +3,8 @@ dist/
 .astro/
 .env
 .env.example
-functions/lib/
-functions/node_modules/
+functions/
+package-lock.json
+tsconfig.json
+.firebaserc
+firebase.json

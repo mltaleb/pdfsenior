@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { $uploadedFile, $pdfBytes, $fileName } from '../stores/app-store';
 import { loadPdfFromFile } from '../lib/pdf-utils';
+import { saveFile } from '../lib/file-storage';
 
 const ACCEPTED_TYPES = [
   'application/pdf',
@@ -35,10 +36,9 @@ export default function UploadZone() {
       const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '');
       $fileName.set(nameWithoutExt);
 
-      if (file.type === 'application/pdf') {
-        const bytes = await loadPdfFromFile(file);
-        $pdfBytes.set(bytes);
-      }
+      const bytes = await loadPdfFromFile(file);
+      $pdfBytes.set(bytes);
+      await saveFile(bytes, nameWithoutExt);
 
       clearInterval(interval);
       setProgress(100);

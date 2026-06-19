@@ -2,12 +2,25 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useStore } from '@nanostores/react';
 import {
   $pdfBytes, $currentPage, $totalPages, $activeTool,
-  $drawColor, $fontSize, $annotations, addAnnotation,
+  $drawColor, $fontSize, $annotations, $fileName, addAnnotation,
   type EditorTool, type Annotation
 } from '../stores/app-store';
+import { loadFile } from '../lib/file-storage';
 
 export default function PdfEditor() {
   const pdfBytes = useStore($pdfBytes);
+
+  // Restore file from IndexedDB on mount
+  useEffect(() => {
+    if (!pdfBytes) {
+      loadFile().then((data) => {
+        if (data) {
+          $pdfBytes.set(data.bytes);
+          $fileName.set(data.fileName);
+        }
+      });
+    }
+  }, []);
   const currentPage = useStore($currentPage);
   const activeTool = useStore($activeTool);
   const drawColor = useStore($drawColor);
