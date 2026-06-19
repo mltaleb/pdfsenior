@@ -1,0 +1,10 @@
+{
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "conv2pdf",
+      "runtime": "nodejs22",
+      "predeploy": ["npm --prefix functions run build"]
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.astro/
+.env
+.env.example
+functions/lib/
+functions/node_modules/

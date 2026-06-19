@@ -1,0 +1,20 @@
+---
+import Layout from '../layouts/Layout.astro';
+import EditorToolbar from '../components/EditorToolbar.tsx';
+import PageThumbnails from '../components/PageThumbnails.tsx';
+import PdfEditor from '../components/PdfEditor.tsx';
+import ExportModal from '../components/ExportModal.tsx';
+import AuthModal from '../components/AuthModal.tsx';
+---
+
+<Layout title="Éditeur PDF - PDFSenior" hideFooter={true}>
+  <div class="h-[calc(100vh-64px)] flex flex-col">
+    <EditorToolbar client:load />
+    <div class="flex flex-1 overflow-hidden">
+      <PageThumbnails client:load />
+      <PdfEditor client:load />
+    </div>
+  </div>
+  <ExportModal client:load />
+  <AuthModal client:load />
+</Layout>

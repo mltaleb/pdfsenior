@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white text-gray-900 antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-8 rounded-full transition-all duration-200 shadow-md hover:shadow-lg active:scale-95;
+  }
+
+  .btn-outline {
+    @apply border-2 border-gray-200 hover:border-primary-500 text-gray-700 hover:text-primary-500 font-semibold py-3 px-8 rounded-full transition-all duration-200;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl shadow-md border border-gray-100 p-6;
+  }
+
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center;
+  }
+
+  .modal-content {
+    @apply bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 relative;
+  }
+
+  .upload-zone {
+    @apply border-2 border-dashed border-gray-300 rounded-2xl p-12 text-center cursor-pointer
+           hover:border-primary-400 hover:bg-primary-50/50 transition-all duration-300;
+  }
+
+  .upload-zone.dragging {
+    @apply border-primary-500 bg-primary-50 scale-[1.02];
+  }
+
+  .format-option {
+    @apply flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all duration-200
+           hover:bg-gray-50 border-2 border-transparent;
+  }
+
+  .format-option.selected {
+    @apply border-primary-500 bg-primary-50;
+  }
+}

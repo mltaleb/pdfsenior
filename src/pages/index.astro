@@ -1,0 +1,28 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
+import Features from '../components/Features.astro';
+---
+
+<Layout title="PDFSenior - Éditeur et Convertisseur PDF">
+  <Hero />
+  <Features />
+
+  <!-- CTA Section -->
+  <section class="bg-cream py-20">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+      <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+        Prêt à commencer ?
+      </h2>
+      <p class="text-lg text-gray-600 mb-8">
+        Téléchargez votre premier PDF et commencez à l'éditer gratuitement.
+      </p>
+      <a href="#top" class="btn-primary inline-flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+        </svg>
+        Télécharger un PDF
+      </a>
+    </div>
+  </section>
+</Layout>
