@@ -104,6 +104,26 @@ export async function applyAnnotationsAndExport(
   return doc.save();
 }
 
+export async function extractPdfText(pdfBytes: Uint8Array): Promise<string> {
+  const pdfjsLib = await import('pdfjs-dist');
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+
+  const doc = await pdfjsLib.getDocument({ data: new Uint8Array(pdfBytes) }).promise;
+  const lines: string[] = [];
+
+  for (let i = 1; i <= doc.numPages; i++) {
+    const page = await doc.getPage(i);
+    const content = await page.getTextContent();
+    const pageText = content.items
+      .filter((item: any) => item.str !== undefined)
+      .map((item: any) => item.str)
+      .join(' ');
+    if (pageText.trim()) lines.push(pageText);
+  }
+
+  return lines.join('\n\n');
+}
+
 export async function exportPdfAsImages(
   pdfBytes: Uint8Array,
   format: 'image/png' | 'image/jpeg' = 'image/png'

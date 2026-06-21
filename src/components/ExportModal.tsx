@@ -4,7 +4,7 @@ import {
   $showExportModal, $selectedFormat, $fileName,
   $pdfBytes, $annotations, $isPaid
 } from '../stores/app-store';
-import { applyAnnotationsAndExport, exportPdfAsImages } from '../lib/pdf-utils';
+import { applyAnnotationsAndExport, exportPdfAsImages, extractPdfText } from '../lib/pdf-utils';
 
 const formats = [
   { id: 'PDF', label: 'PDF', color: '#EF4444', icon: 'PDF' },
@@ -36,47 +36,41 @@ export default function ExportModal() {
     setExporting(true);
 
     try {
-      const clientFormats = ['PDF', 'JPG', 'PNG'];
-
-      if (clientFormats.includes(selectedFormat)) {
-        if (selectedFormat === 'PDF') {
-          const exportedBytes = await applyAnnotationsAndExport(pdfBytes, annotations);
-          downloadBlob(new Blob([exportedBytes], { type: 'application/pdf' }), `${fileName}.pdf`);
-        } else if (selectedFormat === 'JPG' || selectedFormat === 'PNG') {
-          const mimeType = selectedFormat === 'JPG' ? 'image/jpeg' : 'image/png';
-          const blobs = await exportPdfAsImages(pdfBytes, mimeType);
-          if (blobs.length === 1) {
-            downloadBlob(blobs[0], `${fileName}.${selectedFormat.toLowerCase()}`);
-          } else {
-            for (let i = 0; i < blobs.length; i++) {
-              downloadBlob(blobs[i], `${fileName}_page${i + 1}.${selectedFormat.toLowerCase()}`);
-            }
+      if (selectedFormat === 'PDF') {
+        const exportedBytes = await applyAnnotationsAndExport(pdfBytes, annotations);
+        downloadBlob(new Blob([exportedBytes], { type: 'application/pdf' }), `${fileName}.pdf`);
+      } else if (selectedFormat === 'JPG' || selectedFormat === 'PNG') {
+        const mimeType = selectedFormat === 'JPG' ? 'image/jpeg' : 'image/png';
+        const blobs = await exportPdfAsImages(pdfBytes, mimeType);
+        if (blobs.length === 1) {
+          downloadBlob(blobs[0], `${fileName}.${selectedFormat.toLowerCase()}`);
+        } else {
+          for (let i = 0; i < blobs.length; i++) {
+            downloadBlob(blobs[i], `${fileName}_page${i + 1}.${selectedFormat.toLowerCase()}`);
           }
         }
-      } else {
-        // Server-side conversion via Firebase Functions
-        const exportedBytes = await applyAnnotationsAndExport(pdfBytes, annotations);
-        const formData = new FormData();
-        formData.append('file', new Blob([exportedBytes], { type: 'application/pdf' }));
-        formData.append('format', selectedFormat.toLowerCase());
-        formData.append('fileName', fileName);
-
+      } else if (selectedFormat === 'TXT') {
+        const text = await extractPdfText(pdfBytes);
+        downloadBlob(new Blob([text], { type: 'text/plain;charset=utf-8' }), `${fileName}.txt`);
+      } else if (selectedFormat === 'DOCX') {
+        const text = await extractPdfText(pdfBytes);
         const functionsUrl = import.meta.env.PUBLIC_FIREBASE_FUNCTIONS_URL || '';
         if (!functionsUrl) {
-          alert('La conversion serveur n\'est pas encore configurée. Veuillez utiliser PDF, JPG ou PNG pour le moment.');
+          alert('La conversion serveur n\'est pas encore configurée.');
           setExporting(false);
           return;
         }
 
         const response = await fetch(`${functionsUrl}/convert`, {
           method: 'POST',
-          body: formData,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, fileName }),
         });
 
         if (!response.ok) throw new Error('Conversion failed');
 
         const blob = await response.blob();
-        downloadBlob(blob, `${fileName}.${selectedFormat.toLowerCase()}`);
+        downloadBlob(blob, `${fileName}.docx`);
       }
 
       $showExportModal.set(false);
