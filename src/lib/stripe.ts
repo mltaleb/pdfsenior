@@ -1,8 +1,14 @@
+const FUNCTIONS_URL = import.meta.env.PUBLIC_FIREBASE_FUNCTIONS_URL || "https://us-central1-atfagni.cloudfunctions.net"
+
 export async function createCheckoutSession(priceId: string) {
-  const response = await fetch("/api/create-checkout", {
+  const response = await fetch(`${FUNCTIONS_URL}/createCheckout`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ priceId }),
+    body: JSON.stringify({
+      priceId,
+      successUrl: `${window.location.origin}/editor?payment=success`,
+      cancelUrl: `${window.location.origin}/pricing?payment=cancelled`,
+    }),
   })
 
   if (!response.ok) {
