@@ -47,7 +47,7 @@ export default function SplitPdf() {
           const doc = await PDFDocument.create()
           const [page] = await doc.copyPages(src, [i])
           doc.addPage(page)
-          gatedDownload(await doc.save(), `${file.name.replace('.pdf', '')}_page${i + 1}.pdf`)
+          await gatedDownload(await doc.save(), `${file.name.replace('.pdf', '')}_page${i + 1}.pdf`)
         }
       } else {
         const pages = Array.from(selectedPages).sort((a, b) => a - b)
@@ -55,7 +55,7 @@ export default function SplitPdf() {
         const doc = await PDFDocument.create()
         const copied = await doc.copyPages(src, pages)
         copied.forEach(p => doc.addPage(p))
-        gatedDownload(await doc.save(), `${file.name.replace('.pdf', '')}_extrait.pdf`)
+        await gatedDownload(await doc.save(), `${file.name.replace('.pdf', '')}_extrait.pdf`)
       }
     } catch (err) {
       console.error(err)

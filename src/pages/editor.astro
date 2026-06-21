@@ -18,7 +18,9 @@ import ExportModal from '../components/ExportModal.tsx';
 </Layout>
 
 <script>
-  import { $isPaid } from '../stores/app-store';
+  import { $isPaid, $showExportModal, $pdfBytes } from '../stores/app-store';
+  import { loadPendingDownload, clearPendingDownload, triggerDownload } from '../lib/download';
+
   const params = new URLSearchParams(window.location.search);
   if (params.get('payment') === 'success') {
     $isPaid.set(true);
@@ -26,5 +28,18 @@ import ExportModal from '../components/ExportModal.tsx';
     url.searchParams.delete('payment');
     url.searchParams.delete('session_id');
     window.history.replaceState({}, '', url.toString());
+
+    loadPendingDownload().then(pending => {
+      if (pending) {
+        triggerDownload(pending.bytes, pending.fileName);
+        clearPendingDownload();
+      } else if ($pdfBytes.get()) {
+        setTimeout(() => $showExportModal.set(true), 500);
+      }
+    }).catch(() => {
+      if ($pdfBytes.get()) {
+        setTimeout(() => $showExportModal.set(true), 500);
+      }
+    });
   }
 </script>

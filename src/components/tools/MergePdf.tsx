@@ -43,7 +43,7 @@ export default function MergePdf() {
         pages.forEach(p => merged.addPage(p))
       }
       const out = await merged.save()
-      gatedDownload(out, 'merged.pdf')
+      await gatedDownload(out, 'merged.pdf')
     } catch (err) {
       console.error(err)
       alert('Erreur lors de la fusion. Veuillez reessayer.')

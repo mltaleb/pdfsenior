@@ -57,7 +57,7 @@ export default function JpgToPdf() {
       }
 
       const out = await doc.save()
-      gatedDownload(out, 'images.pdf')
+      await gatedDownload(out, 'images.pdf')
     } catch (err) {
       console.error(err)
       alert('Erreur lors de la conversion.')

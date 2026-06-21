@@ -38,7 +38,7 @@ export default function CompressPdf() {
       const compressed = out.length
       setResult({ original, compressed })
 
-      gatedDownload(out, file.name.replace('.pdf', '_compresse.pdf'))
+      await gatedDownload(out, file.name.replace('.pdf', '_compresse.pdf'))
     } catch (err) {
       console.error(err)
       alert('Erreur lors de la compression.')

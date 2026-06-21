@@ -48,7 +48,7 @@ export default function RotatePdf() {
         }
       }
       const out = await doc.save()
-      gatedDownload(out, file.name.replace('.pdf', '_pivote.pdf'))
+      await gatedDownload(out, file.name.replace('.pdf', '_pivote.pdf'))
     } catch (err) {
       console.error(err)
       alert('Erreur lors de la rotation.')

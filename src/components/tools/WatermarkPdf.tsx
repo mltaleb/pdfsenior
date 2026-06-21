@@ -51,7 +51,7 @@ export default function WatermarkPdf() {
       }
 
       const out = await doc.save()
-      gatedDownload(out, file.name.replace('.pdf', '_filigrane.pdf'))
+      await gatedDownload(out, file.name.replace('.pdf', '_filigrane.pdf'))
     } catch (err) {
       console.error(err)
       alert('Erreur lors de l\'ajout du filigrane.')
