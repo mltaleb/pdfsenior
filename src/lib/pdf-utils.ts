@@ -55,8 +55,7 @@ export async function exportPdfAsImages(
   const pdfjsLib = await import('pdfjs-dist');
   pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 
-  const safeBytes = pdfBytes instanceof Uint8Array ? pdfBytes : new Uint8Array(pdfBytes);
-  const doc = await pdfjsLib.getDocument({ data: safeBytes }).promise;
+  const doc = await pdfjsLib.getDocument({ data: new Uint8Array(pdfBytes) }).promise;
   const blobs: Blob[] = [];
 
   for (let i = 1; i <= doc.numPages; i++) {

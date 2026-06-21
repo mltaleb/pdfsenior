@@ -16,7 +16,7 @@ export default function PageThumbnails() {
       const pdfjsLib = await import('pdfjs-dist');
       pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 
-      const doc = await pdfjsLib.getDocument({ data: pdfBytes }).promise;
+      const doc = await pdfjsLib.getDocument({ data: new Uint8Array(pdfBytes) }).promise;
       $totalPages.set(doc.numPages);
 
       const urls: string[] = [];
