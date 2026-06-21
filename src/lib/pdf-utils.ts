@@ -8,7 +8,8 @@ export async function loadPdfFromFile(file: File): Promise<Uint8Array> {
 }
 
 export async function getPdfPageCount(pdfBytes: Uint8Array): Promise<number> {
-  const doc = await PDFDocument.load(pdfBytes);
+  const safeBytes = pdfBytes instanceof Uint8Array ? pdfBytes : new Uint8Array(pdfBytes);
+  const doc = await PDFDocument.load(safeBytes);
   return doc.getPageCount();
 }
 
@@ -16,7 +17,8 @@ export async function applyAnnotationsAndExport(
   pdfBytes: Uint8Array,
   annotations: Annotation[]
 ): Promise<Uint8Array> {
-  const doc = await PDFDocument.load(pdfBytes);
+  const safeBytes = pdfBytes instanceof Uint8Array ? pdfBytes : new Uint8Array(pdfBytes);
+  const doc = await PDFDocument.load(safeBytes);
 
   for (const annotation of annotations) {
     if (annotation.page < 1 || annotation.page > doc.getPageCount()) continue;
@@ -53,7 +55,8 @@ export async function exportPdfAsImages(
   const pdfjsLib = await import('pdfjs-dist');
   pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 
-  const doc = await pdfjsLib.getDocument({ data: pdfBytes }).promise;
+  const safeBytes = pdfBytes instanceof Uint8Array ? pdfBytes : new Uint8Array(pdfBytes);
+  const doc = await pdfjsLib.getDocument({ data: safeBytes }).promise;
   const blobs: Blob[] = [];
 
   for (let i = 1; i <= doc.numPages; i++) {

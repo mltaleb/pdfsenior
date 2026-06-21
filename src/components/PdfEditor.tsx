@@ -64,8 +64,14 @@ export default function PdfEditor() {
   useEffect(() => {
     if (!pdfBytes) {
       loadFile().then(data => {
-        if (data) {
-          $pdfBytes.set(new Uint8Array(data.bytes))
+        if (data && data.bytes) {
+          const raw = data.bytes
+          const bytes = raw instanceof ArrayBuffer
+            ? new Uint8Array(raw)
+            : raw.buffer
+              ? new Uint8Array(raw.buffer, raw.byteOffset, raw.byteLength)
+              : new Uint8Array(raw)
+          $pdfBytes.set(bytes)
           $fileName.set(data.fileName)
         }
       })
