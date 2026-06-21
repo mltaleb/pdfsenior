@@ -18,12 +18,13 @@ import ExportModal from '../components/ExportModal.tsx';
 </Layout>
 
 <script>
-  import { $isPaid, $showExportModal, $pdfBytes } from '../stores/app-store';
+  import { setPaid, $showExportModal, $pdfBytes } from '../stores/app-store';
   import { loadPendingDownload, clearPendingDownload, triggerDownload } from '../lib/download';
 
   const params = new URLSearchParams(window.location.search);
   if (params.get('payment') === 'success') {
-    $isPaid.set(true);
+    const planId = localStorage.getItem('pdfsenior_selected_plan') || 'day-pass';
+    setPaid(planId);
     const url = new URL(window.location.href);
     url.searchParams.delete('payment');
     url.searchParams.delete('session_id');

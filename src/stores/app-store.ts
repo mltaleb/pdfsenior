@@ -10,7 +10,31 @@ export const $showAuthModal = atom<boolean>(false);
 export const $showExportModal = atom<boolean>(false);
 export const $showSignModal = atom<boolean>(false);
 export const $selectedFormat = atom<string>('PDF');
-export const $isPaid = atom<boolean>(false);
+function checkPaymentStatus(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    const stored = localStorage.getItem('pdfsenior_payment');
+    if (!stored) return false;
+    const { expiresAt } = JSON.parse(stored);
+    if (Date.now() < expiresAt) return true;
+    localStorage.removeItem('pdfsenior_payment');
+  } catch {}
+  return false;
+}
+
+export const $isPaid = atom<boolean>(checkPaymentStatus());
+
+export function setPaid(planId: string) {
+  const durations: Record<string, number> = {
+    'single': 30 * 60 * 1000,
+    'day-pass': 24 * 60 * 60 * 1000,
+    'monthly': 30 * 24 * 60 * 60 * 1000,
+  };
+  const duration = durations[planId] || 24 * 60 * 60 * 1000;
+  const data = { planId, expiresAt: Date.now() + duration };
+  localStorage.setItem('pdfsenior_payment', JSON.stringify(data));
+  $isPaid.set(true);
+}
 
 export const $user = map<{
   id: string;

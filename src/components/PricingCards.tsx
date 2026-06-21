@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useStore } from '@nanostores/react'
-import { $pdfBytes, $fileName, $isPaid } from '../stores/app-store'
+import { $pdfBytes, $fileName, setPaid } from '../stores/app-store'
 import { PRICING_PLANS, createCheckoutSession } from '../lib/stripe'
 import { loadFile } from '../lib/file-storage'
 
@@ -52,6 +52,7 @@ export default function PricingCards() {
       const plan = PRICING_PLANS.find(p => p.id === selectedPlan)
       if (!plan) return
 
+      localStorage.setItem('pdfsenior_selected_plan', plan.id)
       const url = await createCheckoutSession(plan.priceId)
       if (url) {
         window.location.href = url
@@ -59,7 +60,7 @@ export default function PricingCards() {
       }
     } catch (err: any) {
       if (err?.message?.includes('not configured')) {
-        $isPaid.set(true)
+        setPaid(selectedPlan)
         alert('Mode demo : Paiement simule ! Vous pouvez telecharger vos fichiers.')
         window.location.href = '/editor?payment=success'
         return
