@@ -2,21 +2,16 @@ import { useState } from 'react';
 import { useStore } from '@nanostores/react';
 import {
   $showExportModal, $selectedFormat, $fileName,
-  $pdfBytes, $annotations, $isAuthenticated, $showAuthModal
+  $pdfBytes, $annotations, $isPaid
 } from '../stores/app-store';
 import { applyAnnotationsAndExport, exportPdfAsImages } from '../lib/pdf-utils';
 
 const formats = [
   { id: 'PDF', label: 'PDF', color: '#EF4444', icon: 'PDF' },
-  { id: 'DOCX', label: 'DOCX', color: '#2563EB', icon: 'DOCX' },
-  { id: 'DOC', label: 'DOC', color: '#2563EB', icon: 'DOC' },
-  { id: 'PPT', label: 'PPT', color: '#F97316', icon: 'PPT' },
-  { id: 'PPTX', label: 'PPTX', color: '#F97316', icon: 'PPTX' },
+  { id: 'DOCX', label: 'Word', color: '#2563EB', icon: 'DOCX' },
   { id: 'JPG', label: 'JPG', color: '#10B981', icon: 'JPG' },
   { id: 'PNG', label: 'PNG', color: '#8B5CF6', icon: 'PNG' },
-  { id: 'TXT', label: 'TXT', color: '#6B7280', icon: 'TXT' },
-  { id: 'XLSX', label: 'XLSX', color: '#059669', icon: 'XLSX' },
-  { id: 'XLS', label: 'XLS', color: '#059669', icon: 'XLS' },
+  { id: 'TXT', label: 'Texte', color: '#6B7280', icon: 'TXT' },
 ];
 
 export default function ExportModal() {
@@ -25,14 +20,15 @@ export default function ExportModal() {
   const fileName = useStore($fileName);
   const pdfBytes = useStore($pdfBytes);
   const annotations = useStore($annotations);
-  const isAuthenticated = useStore($isAuthenticated);
+  const isPaid = useStore($isPaid);
   const [exporting, setExporting] = useState(false);
 
   if (!showModal) return null;
 
   const handleDownload = async () => {
-    if (!isAuthenticated) {
-      $showAuthModal.set(true);
+    if (!isPaid) {
+      $showExportModal.set(false);
+      window.location.href = '/pricing';
       return;
     }
 

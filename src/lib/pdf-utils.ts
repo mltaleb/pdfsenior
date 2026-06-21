@@ -1,5 +1,6 @@
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { PDFDocument, rgb } from 'pdf-lib';
 import type { Annotation } from '../stores/app-store';
+import { embedMatchingFont } from './font-utils';
 
 export async function loadPdfFromFile(file: File): Promise<Uint8Array> {
   const buffer = await file.arrayBuffer();
@@ -16,7 +17,6 @@ export async function applyAnnotationsAndExport(
   annotations: Annotation[]
 ): Promise<Uint8Array> {
   const doc = await PDFDocument.load(pdfBytes);
-  const font = await doc.embedFont(StandardFonts.Helvetica);
 
   for (const annotation of annotations) {
     if (annotation.page < 1 || annotation.page > doc.getPageCount()) continue;
@@ -26,6 +26,13 @@ export async function applyAnnotationsAndExport(
     if (annotation.type === 'text') {
       const fontSize = annotation.fontSize || 16;
       const color = hexToRgb(annotation.color || '#000000');
+      const font = await embedMatchingFont(
+        doc,
+        '',
+        annotation.fontFamily || 'sans-serif',
+        annotation.bold || false,
+        annotation.italic || false,
+      );
       page.drawText(annotation.content, {
         x: annotation.x,
         y: height - annotation.y - fontSize,

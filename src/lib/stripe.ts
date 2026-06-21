@@ -1,55 +1,46 @@
-export async function createCheckoutSession(priceId: string, email: string) {
-  const response = await fetch('/api/create-checkout', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ priceId, email }),
-  });
+export async function createCheckoutSession(priceId: string) {
+  const response = await fetch("/api/create-checkout", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ priceId }),
+  })
 
   if (!response.ok) {
-    throw new Error('Failed to create checkout session');
+    const err = await response.json().catch(() => ({ error: "Unknown" }))
+    throw new Error(err.error || "Failed to create checkout session")
   }
 
-  const { url } = await response.json();
-  return url;
+  const { url } = await response.json()
+  return url as string
 }
 
 export const PRICING_PLANS = [
   {
-    id: 'limited-7day',
-    name: 'Accès limité de 7 jours',
-    price: '$0.95',
-    priceId: 'price_limited_7day',
-    features: ['Téléchargement de 3 documents', 'Formats PDF et JPG uniquement'],
+    id: "single",
+    name: "Acces unique",
+    description: "Telechargez le document en cours",
+    price: "1.99 €",
+    priceId: "prod_UkBMACWnWQ2qXG",
+    mode: "payment" as const,
     recommended: false,
   },
   {
-    id: 'full-7day',
-    name: 'Accès complet de 7 jours',
-    price: '$1.95',
-    priceId: 'price_full_7day',
-    features: [
-      'Remplissez, modifiez et enregistrez tous vos PDF',
-      'Divisez ou fusionnez des documents en quelques secondes',
-      'Accédez à tous vos fichiers depuis n\'importe quel appareil',
-      'Convertissez des PDF depuis et vers Word, Excel, PPTX, JPG ou PNG',
-      'Signez des documents en ligne rapidement et en toute sécurité',
-      'Ajoutez de nouveaux champs à remplir à vos PDF',
-      'Accédez à des modèles de formulaires prêts à l\'emploi',
-    ],
+    id: "day-pass",
+    name: "Pass journee",
+    description: "Telechargements illimites pendant 24h",
+    price: "4.99 €",
+    priceId: "prod_UkBNYwUrsa5332",
+    mode: "payment" as const,
     recommended: true,
   },
   {
-    id: 'annual',
-    name: 'Abonnement annuel',
-    price: '$24.9',
-    priceSuffix: '/mois',
-    priceId: 'price_annual',
-    features: [
-      'Tout inclus dans l\'accès complet',
-      'Documents illimités',
-      'Support prioritaire',
-      'Stockage cloud inclus',
-    ],
+    id: "monthly",
+    name: "Abonnement mensuel",
+    description: "Telechargements illimites",
+    price: "9.99 €",
+    priceSuffix: "/mois",
+    priceId: "prod_UkBOyIZSUkDW6q",
+    mode: "subscription" as const,
     recommended: false,
   },
-] as const;
+]

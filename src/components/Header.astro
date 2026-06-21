@@ -21,56 +21,46 @@ const currentPath = Astro.url.pathname;
       <nav class="hidden md:flex items-center gap-1">
         <div class="relative group">
           <button class="flex items-center gap-1 px-4 py-2 text-sm font-semibold text-gray-700 hover:text-primary-500 rounded-lg hover:bg-gray-50 transition-colors">
-            Convertisseur PDF
+            Outils PDF
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
             </svg>
           </button>
           <div class="absolute top-full left-0 mt-1 w-56 bg-white rounded-xl shadow-lg border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 p-2">
-            <a href="/" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-colors">Word en PDF</a>
-            <a href="/" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-colors">Excel en PDF</a>
-            <a href="/" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-colors">PPT en PDF</a>
-            <a href="/" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-colors">JPG en PDF</a>
-            <a href="/" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-colors">PDF en Word</a>
-            <a href="/" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-colors">PDF en Excel</a>
+            <a href="/tools/merge" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-colors">Fusionner PDF</a>
+            <a href="/tools/split" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-colors">Diviser PDF</a>
+            <a href="/tools/compress" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-colors">Compresser PDF</a>
+            <a href="/tools/rotate" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-colors">Pivoter PDF</a>
+            <a href="/tools/watermark" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-colors">Filigrane PDF</a>
           </div>
         </div>
 
         <div class="relative group">
           <button class="flex items-center gap-1 px-4 py-2 text-sm font-semibold text-gray-700 hover:text-primary-500 rounded-lg hover:bg-gray-50 transition-colors">
-            Éditeur PDF
+            Convertir
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
             </svg>
           </button>
           <div class="absolute top-full left-0 mt-1 w-56 bg-white rounded-xl shadow-lg border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 p-2">
-            <a href="/" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-colors">Modifier un PDF</a>
-            <a href="/" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-colors">Fusionner des PDF</a>
-            <a href="/" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-colors">Diviser un PDF</a>
-            <a href="/" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-colors">Compresser un PDF</a>
+            <a href="/editor" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-colors">PDF en Word</a>
+            <a href="/editor" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-colors">PDF en JPG / PNG</a>
+            <a href="/tools/jpg-to-pdf" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-colors">JPG en PDF</a>
           </div>
         </div>
 
-        <div class="relative group">
-          <button class="flex items-center gap-1 px-4 py-2 text-sm font-semibold text-gray-700 hover:text-primary-500 rounded-lg hover:bg-gray-50 transition-colors">
-            Formulaires
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-        </div>
+        <a href="/editor" class="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-primary-500 rounded-lg hover:bg-gray-50 transition-colors">
+          Signer PDF
+        </a>
       </nav>
 
       <!-- Right side -->
       <div class="flex items-center gap-3">
         <a href="/pricing" class="hidden sm:inline-flex text-sm font-medium text-gray-600 hover:text-primary-500 transition-colors">
-          Mon compte
+          Tarifs
         </a>
-        <a href="/pricing" class="hidden sm:inline-flex text-sm font-medium text-gray-600 hover:text-primary-500 transition-colors">
-          Mes documents
-        </a>
-        <a href="/pricing" class="text-sm font-medium text-gray-600 hover:text-primary-500 transition-colors">
-          Contactez-nous
+        <a href="/#tools" class="btn-primary !py-2 !px-5 text-sm">
+          Tous les outils
         </a>
       </div>
     </div>

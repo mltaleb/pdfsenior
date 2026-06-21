@@ -8,6 +8,7 @@ export const $totalPages = atom<number>(0);
 export const $isAuthenticated = atom<boolean>(false);
 export const $showAuthModal = atom<boolean>(false);
 export const $showExportModal = atom<boolean>(false);
+export const $showSignModal = atom<boolean>(false);
 export const $selectedFormat = atom<string>('PDF');
 export const $isPaid = atom<boolean>(false);
 
@@ -17,14 +18,18 @@ export const $user = map<{
   name: string;
 } | null>(null);
 
-export type EditorTool = 'select' | 'text' | 'draw' | 'sign' | 'erase' | 'highlight';
+export type EditorTool = 'select' | 'text' | 'draw' | 'sign' | 'line' | 'erase' | 'highlight' | 'image' | 'note';
 export const $activeTool = atom<EditorTool>('select');
 export const $drawColor = atom<string>('#000000');
 export const $fontSize = atom<number>(16);
+export const $fontFamily = atom<string>('Inter');
+export const $fontBold = atom<boolean>(false);
+export const $fontItalic = atom<boolean>(false);
+export const $lineWidth = atom<number>(2);
 
 export interface Annotation {
   id: string;
-  type: 'text' | 'drawing' | 'signature';
+  type: 'text' | 'drawing' | 'signature' | 'image' | 'line' | 'highlight' | 'note';
   page: number;
   x: number;
   y: number;
@@ -33,14 +38,66 @@ export interface Annotation {
   height?: number;
   color?: string;
   fontSize?: number;
+  fontFamily?: string;
+  bold?: boolean;
+  italic?: boolean;
+  lineWidth?: number;
+  endX?: number;
+  endY?: number;
+  selected?: boolean;
 }
 
 export const $annotations = atom<Annotation[]>([]);
 
+// History for undo/redo
+interface HistoryState {
+  states: Annotation[][];
+  index: number;
+}
+
+export const $history = atom<HistoryState>({ states: [[]], index: 0 });
+
+function pushHistory(annotations: Annotation[]) {
+  const h = $history.get();
+  const newStates = h.states.slice(0, h.index + 1);
+  newStates.push([...annotations]);
+  $history.set({ states: newStates, index: newStates.length - 1 });
+}
+
 export function addAnnotation(annotation: Annotation) {
-  $annotations.set([...$annotations.get(), annotation]);
+  const next = [...$annotations.get(), annotation];
+  $annotations.set(next);
+  pushHistory(next);
+}
+
+export function updateAnnotation(id: string, updates: Partial<Annotation>) {
+  const next = $annotations.get().map(a => a.id === id ? { ...a, ...updates } : a);
+  $annotations.set(next);
+  pushHistory(next);
 }
 
 export function removeAnnotation(id: string) {
-  $annotations.set($annotations.get().filter(a => a.id !== id));
+  const next = $annotations.get().filter(a => a.id !== id);
+  $annotations.set(next);
+  pushHistory(next);
+}
+
+export function undo() {
+  const h = $history.get();
+  if (h.index <= 0) return;
+  const newIndex = h.index - 1;
+  $history.set({ ...h, index: newIndex });
+  $annotations.set([...h.states[newIndex]]);
+}
+
+export function redo() {
+  const h = $history.get();
+  if (h.index >= h.states.length - 1) return;
+  const newIndex = h.index + 1;
+  $history.set({ ...h, index: newIndex });
+  $annotations.set([...h.states[newIndex]]);
+}
+
+export function selectAnnotation(id: string | null) {
+  $annotations.set($annotations.get().map(a => ({ ...a, selected: a.id === id })));
 }

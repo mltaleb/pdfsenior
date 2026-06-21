@@ -39,14 +39,14 @@ export default function PageThumbnails() {
   if (!pdfBytes) return null;
 
   return (
-    <div ref={containerRef} className="w-48 bg-gray-50 border-r border-gray-200 overflow-y-auto p-3 flex flex-col gap-3">
-      <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-1">
+    <div ref={containerRef} className="w-48 bg-white border-r border-gray-200 overflow-y-auto p-4 hidden md:flex flex-col gap-3">
+      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
         Miniatures
-      </h3>
+      </p>
       {thumbnails.map((url, index) => (
         <button
           key={index}
-          className={`relative rounded-lg overflow-hidden border-2 transition-all ${
+          className={`relative rounded-lg overflow-hidden border-2 transition-all hover:shadow-md ${
             currentPage === index + 1
               ? 'border-primary-500 shadow-md'
               : 'border-transparent hover:border-gray-300'
@@ -54,10 +54,10 @@ export default function PageThumbnails() {
           onClick={() => $currentPage.set(index + 1)}
         >
           <img src={url} alt={`Page ${index + 1}`} className="w-full" />
-          <div className={`absolute bottom-0 inset-x-0 text-center py-1 text-xs font-medium ${
+          <div className={`absolute bottom-0 inset-x-0 text-center py-0.5 text-xs font-bold ${
             currentPage === index + 1
               ? 'bg-primary-500 text-white'
-              : 'bg-gray-800/60 text-white'
+              : 'bg-gray-800/50 text-white'
           }`}>
             {index + 1}
           </div>
@@ -67,7 +67,7 @@ export default function PageThumbnails() {
       {thumbnails.length === 0 && totalPages > 0 && (
         <div className="flex flex-col gap-3">
           {Array.from({ length: totalPages }).map((_, i) => (
-            <div key={i} className="h-48 bg-gray-200 rounded-lg animate-pulse" />
+            <div key={i} className="h-48 bg-gray-100 rounded-lg animate-pulse" />
           ))}
         </div>
       )}

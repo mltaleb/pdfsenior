@@ -4,7 +4,6 @@ import EditorToolbar from '../components/EditorToolbar.tsx';
 import PageThumbnails from '../components/PageThumbnails.tsx';
 import PdfEditor from '../components/PdfEditor.tsx';
 import ExportModal from '../components/ExportModal.tsx';
-import AuthModal from '../components/AuthModal.tsx';
 ---
 
 <Layout title="Éditeur PDF - PDFSenior" hideFooter={true}>
@@ -16,5 +15,16 @@ import AuthModal from '../components/AuthModal.tsx';
     </div>
   </div>
   <ExportModal client:load />
-  <AuthModal client:load />
 </Layout>
+
+<script>
+  import { $isPaid } from '../stores/app-store';
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('payment') === 'success') {
+    $isPaid.set(true);
+    const url = new URL(window.location.href);
+    url.searchParams.delete('payment');
+    url.searchParams.delete('session_id');
+    window.history.replaceState({}, '', url.toString());
+  }
+</script>

@@ -1,149 +1,192 @@
 import { useStore } from '@nanostores/react';
-import { $activeTool, $showExportModal, $drawColor, $fontSize, type EditorTool } from '../stores/app-store';
+import { useRef } from 'react';
+import {
+  $activeTool, $showExportModal, $drawColor, $fontSize,
+  $fontFamily, $fontBold, $fontItalic, $history, undo, redo,
+  type EditorTool
+} from '../stores/app-store';
+import {
+  MousePointer2, Type, PenLine, Highlighter, Image as ImageIcon,
+  StickyNote, Trash2, Pen, Minus as LineIcon, FileSignature,
+  Undo2, Redo2, Mail, Check
+} from 'lucide-react';
 
-const tools: { id: EditorTool; label: string; icon: string }[] = [
-  {
-    id: 'text',
-    label: 'Ajouter du texte',
-    icon: '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h8m-8 6h16" /></svg>',
-  },
-  {
-    id: 'sign',
-    label: 'Signer',
-    icon: '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487z" /></svg>',
-  },
-  {
-    id: 'draw',
-    label: 'Dessiner',
-    icon: '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" /></svg>',
-  },
-  {
-    id: 'highlight',
-    label: 'Surligner',
-    icon: '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 3l6 6-9 9H6v-6l9-9z" /></svg>',
-  },
-  {
-    id: 'erase',
-    label: 'Effacer',
-    icon: '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z" /></svg>',
-  },
+const tools: { id: EditorTool; label: string; icon: typeof Type }[] = [
+  { id: 'select', label: 'Selectionner', icon: MousePointer2 },
+  { id: 'text', label: 'Texte', icon: Type },
+  { id: 'sign', label: 'Signer', icon: FileSignature },
+  { id: 'draw', label: 'Dessiner', icon: Pen },
+  { id: 'line', label: 'Ligne', icon: LineIcon },
+  { id: 'highlight', label: 'Surligner', icon: Highlighter },
+  { id: 'image', label: 'Image', icon: ImageIcon },
+  { id: 'note', label: 'Note', icon: StickyNote },
+  { id: 'erase', label: 'Effacer', icon: Trash2 },
 ];
+
+const fonts = ['Inter', 'Noto Serif', 'Roboto Mono', 'Arial', 'Calibri', 'Helvetica', 'Times New Roman', 'Times', 'Courier New', 'Courier', 'Georgia', 'Verdana', 'Tahoma', 'Trebuchet MS', 'Segoe UI', 'Cambria', 'Garamond', 'Consolas', 'Sans-serif', 'Serif', 'Monospace'];
 
 export default function EditorToolbar() {
   const activeTool = useStore($activeTool);
   const drawColor = useStore($drawColor);
-  const fontSize = useStore($fontSize);
+  const fontSz = useStore($fontSize);
+  const fontFam = useStore($fontFamily);
+  const bold = useStore($fontBold);
+  const italic = useStore($fontItalic);
+  const history = useStore($history);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      window.dispatchEvent(new CustomEvent('editor-insert-image', { detail: reader.result }));
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
 
   return (
-    <div className="bg-white border-b border-gray-200 px-4 py-2">
-      <div className="flex items-center justify-between">
-        {/* Left tools */}
-        <div className="flex items-center gap-1">
-          {/* Undo/Redo */}
+    <div className="bg-[#F9FAFB] border-b border-gray-200 shadow-sm">
+      <div className="px-4 py-1 flex items-center justify-between gap-2 overflow-x-auto">
+        {/* Left: Undo/Redo */}
+        <div className="flex items-center gap-0.5 flex-shrink-0">
           <button
-            className="p-2.5 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
-            title="Annuler"
+            className="p-2 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 disabled:opacity-30 transition-colors"
+            title="Annuler (Ctrl+Z)"
+            onClick={undo}
+            disabled={history.index <= 0}
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
-            </svg>
+            <Undo2 size={18} />
           </button>
           <button
-            className="p-2.5 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
-            title="Recommencer"
+            className="p-2 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 disabled:opacity-30 transition-colors"
+            title="Refaire (Ctrl+Y)"
+            onClick={redo}
+            disabled={history.index >= history.states.length - 1}
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 15l6-6m0 0l-6-6m6 6H9a6 6 0 000 12h3" />
-            </svg>
+            <Redo2 size={18} />
           </button>
-
           <div className="w-px h-8 bg-gray-200 mx-2" />
+        </div>
 
-          {/* Main tools */}
-          {tools.map((tool) => (
-            <button
-              key={tool.id}
-              className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                activeTool === tool.id
-                  ? 'bg-primary-50 text-primary-600'
-                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-800'
-              }`}
-              onClick={() => $activeTool.set(tool.id)}
-              title={tool.label}
-            >
-              <span dangerouslySetInnerHTML={{ __html: tool.icon }} />
-              <span className="hidden lg:inline">{tool.label}</span>
-            </button>
-          ))}
-
-          {/* Color/Size controls when drawing */}
-          {(activeTool === 'draw' || activeTool === 'text' || activeTool === 'highlight') && (
-            <>
-              <div className="w-px h-8 bg-gray-200 mx-2" />
-              <input
-                type="color"
-                value={drawColor}
-                onChange={(e) => $drawColor.set(e.target.value)}
-                className="w-8 h-8 rounded cursor-pointer border border-gray-200"
-                title="Couleur"
-              />
-              {activeTool === 'text' && (
-                <select
-                  value={fontSize}
-                  onChange={(e) => $fontSize.set(Number(e.target.value))}
-                  className="ml-2 px-2 py-1 border border-gray-200 rounded-lg text-sm"
-                >
-                  {[10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48, 64].map((s) => (
-                    <option key={s} value={s}>{s}px</option>
-                  ))}
-                </select>
-              )}
-            </>
-          )}
+        {/* Center: Tools */}
+        <div className="flex items-center gap-0.5 flex-shrink-0">
+          {tools.map((tool) => {
+            const Icon = tool.icon;
+            const isActive = activeTool === tool.id;
+            return (
+              <button
+                key={tool.id}
+                className={`flex flex-col items-center justify-center w-[72px] h-14 rounded-lg text-[11px] font-medium transition-all ${
+                  isActive
+                    ? 'text-primary-500 bg-primary-50 border border-primary-100'
+                    : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 border border-transparent'
+                }`}
+                onClick={() => {
+                  $activeTool.set(tool.id);
+                  if (tool.id === 'image') imageInputRef.current?.click();
+                }}
+                title={tool.label}
+              >
+                <Icon size={18} strokeWidth={isActive ? 2 : 1.5} />
+                <span className="mt-0.5 hidden sm:inline">{tool.label}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Right actions */}
-        <div className="flex items-center gap-2">
-          <button
-            className="hidden md:flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors"
-            title="Gérer les pages"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
-            </svg>
-            <span>Gérer les pages</span>
-          </button>
-
-          <button
-            className="hidden md:flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors"
-            onClick={() => window.print()}
-            title="Imprimer"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" />
-            </svg>
-            <span>Imprimer</span>
-          </button>
-
+        <div className="flex items-center gap-2 flex-shrink-0">
           <div className="w-px h-8 bg-gray-200 mx-1" />
-
-          {/* Send by email */}
-          <button className="btn-outline !py-2 !px-4 text-sm">
-            Envoyer par e-mail
+          <button className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors">
+            <Mail size={14} />
+            <span>E-mail</span>
           </button>
-
-          {/* Done / Export */}
           <button
-            className="btn-primary !py-2 !px-6 text-sm flex items-center gap-2"
+            className="flex items-center gap-1.5 bg-primary-500 text-white px-5 py-2 rounded-lg text-sm font-bold hover:bg-primary-600 transition-colors shadow-sm"
             onClick={() => $showExportModal.set(true)}
           >
-            Terminé
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
+            Termine
+            <Check size={16} strokeWidth={2.5} />
           </button>
         </div>
+
+        <input
+          ref={imageInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleImageUpload}
+        />
       </div>
+
+      {/* Context toolbar: font controls */}
+      {(activeTool === 'text' || activeTool === 'note') && (
+        <div className="px-4 py-1.5 border-t border-gray-200/60 flex items-center gap-3 bg-white/60">
+          <input
+            type="color"
+            value={drawColor}
+            onChange={(e) => $drawColor.set(e.target.value)}
+            className="w-7 h-7 rounded cursor-pointer border border-gray-200"
+            title="Couleur"
+          />
+          <div className="w-px h-6 bg-gray-200" />
+          <select
+            value={fontFam}
+            onChange={(e) => $fontFamily.set(e.target.value)}
+            className="px-2 py-1 border border-gray-200 rounded-lg text-sm bg-white min-w-[130px] focus:outline-none focus:border-primary-300"
+          >
+            {fonts.map((f) => (
+              <option key={f} value={f} style={{ fontFamily: f }}>{f}</option>
+            ))}
+          </select>
+          <select
+            value={fontSz}
+            onChange={(e) => $fontSize.set(Number(e.target.value))}
+            className="px-2 py-1 border border-gray-200 rounded-lg text-sm bg-white w-16 focus:outline-none focus:border-primary-300"
+          >
+            {[8, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48, 64, 72, 96].map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+          <div className="w-px h-6 bg-gray-200" />
+          <button
+            className={`w-8 h-8 flex items-center justify-center rounded font-bold text-sm transition-colors ${bold ? 'bg-primary-100 text-primary-600' : 'hover:bg-gray-200 text-gray-500'}`}
+            onClick={() => $fontBold.set(!bold)}
+            title="Gras"
+          >B</button>
+          <button
+            className={`w-8 h-8 flex items-center justify-center rounded italic text-sm transition-colors ${italic ? 'bg-primary-100 text-primary-600' : 'hover:bg-gray-200 text-gray-500'}`}
+            onClick={() => $fontItalic.set(!italic)}
+            title="Italique"
+          >I</button>
+        </div>
+      )}
+
+      {/* Draw controls */}
+      {(activeTool === 'draw' || activeTool === 'line' || activeTool === 'highlight') && (
+        <div className="px-4 py-1.5 border-t border-gray-200/60 flex items-center gap-3 bg-white/60">
+          <input
+            type="color"
+            value={activeTool === 'highlight' ? '#FFFF00' : drawColor}
+            onChange={(e) => $drawColor.set(e.target.value)}
+            className="w-7 h-7 rounded cursor-pointer border border-gray-200"
+            title="Couleur"
+          />
+          <span className="text-xs text-gray-500">Epaisseur :</span>
+          <input
+            type="range"
+            min="1"
+            max="10"
+            defaultValue="2"
+            className="w-24 accent-primary-500"
+            onChange={(e) => {
+              window.dispatchEvent(new CustomEvent('editor-line-width', { detail: Number(e.target.value) }));
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }
