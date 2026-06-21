@@ -1,4 +1,6 @@
-const FUNCTIONS_URL = import.meta.env.PUBLIC_FIREBASE_FUNCTIONS_URL || "https://us-central1-atfagni.cloudfunctions.net"
+const FUNCTIONS_URL =
+  import.meta.env.PUBLIC_FIREBASE_FUNCTIONS_URL ||
+  "https://us-central1-atfagni.cloudfunctions.net"
 
 export async function createCheckoutSession(priceId: string) {
   const response = await fetch(`${FUNCTIONS_URL}/createCheckout`, {
@@ -26,7 +28,7 @@ export const PRICING_PLANS = [
     name: "Acces unique",
     description: "Telechargez le document en cours",
     price: "1.99 €",
-    priceId: "prod_UkBMACWnWQ2qXG",
+    priceId: "price_1TkgzoPxIk9diKSaa4UumgkA",
     mode: "payment" as const,
     recommended: false,
   },
@@ -35,7 +37,7 @@ export const PRICING_PLANS = [
     name: "Pass journee",
     description: "Telechargements illimites pendant 24h",
     price: "4.99 €",
-    priceId: "prod_UkBNYwUrsa5332",
+    priceId: "price_1Tkh12PxIk9diKSaOyJDM1oX",
     mode: "payment" as const,
     recommended: true,
   },
@@ -45,7 +47,7 @@ export const PRICING_PLANS = [
     description: "Telechargements illimites",
     price: "9.99 €",
     priceSuffix: "/mois",
-    priceId: "prod_UkBOyIZSUkDW6q",
+    priceId: "price_1Tkh1mPxIk9diKSaeSSA4a4Y",
     mode: "subscription" as const,
     recommended: false,
   },

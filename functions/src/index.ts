@@ -1,54 +1,6 @@
 import * as functions from "firebase-functions/v1";
 
-export const createCheckout = functions
-  .runWith({ timeoutSeconds: 30, memory: "256MB" })
-  .https.onRequest(async (req, res) => {
-    res.set("Access-Control-Allow-Origin", "*");
-    res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
-    res.set("Access-Control-Allow-Headers", "Content-Type");
-
-    if (req.method === "OPTIONS") {
-      res.status(204).send("");
-      return;
-    }
-
-    if (req.method !== "POST") {
-      res.status(405).send("Method Not Allowed");
-      return;
-    }
-
-    const stripeKey = functions.config().stripe?.secret_key;
-    if (!stripeKey) {
-      res.status(503).json({ error: "Stripe not configured. Run: firebase functions:config:set stripe.secret_key=sk_test_..." });
-      return;
-    }
-
-    try {
-      const { priceId, successUrl, cancelUrl } = req.body;
-      if (!priceId) {
-        res.status(400).json({ error: "Missing priceId" });
-        return;
-      }
-
-      const Stripe = require("stripe");
-      const stripe = new Stripe(stripeKey);
-
-      const isSubscription = priceId.includes("monthly");
-
-      const session = await stripe.checkout.sessions.create({
-        payment_method_types: ["card"],
-        line_items: [{ price: priceId, quantity: 1 }],
-        mode: isSubscription ? "subscription" : "payment",
-        success_url: successUrl || "https://pdfsenior.com/editor?payment=success",
-        cancel_url: cancelUrl || "https://pdfsenior.com/pricing?payment=cancelled",
-      });
-
-      res.json({ url: session.url });
-    } catch (err) {
-      console.error("Stripe error:", err);
-      res.status(500).json({ error: err instanceof Error ? err.message : "Unknown error" });
-    }
-  });
+export { createCheckout } from "./checkout";
 
 const MIME_MAP: Record<string, string> = {
   docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
