@@ -33,13 +33,15 @@ import ExportModal from '../components/ExportModal.tsx';
       if (pending) {
         triggerDownload(pending.bytes, pending.fileName);
         clearPendingDownload();
-      } else if ($pdfBytes.get()) {
-        setTimeout(() => $showExportModal.set(true), 500);
+      } else {
+        const unsub = $pdfBytes.listen(bytes => {
+          if (bytes) {
+            unsub();
+            $showExportModal.set(true);
+          }
+        });
+        setTimeout(() => unsub(), 10000);
       }
-    }).catch(() => {
-      if ($pdfBytes.get()) {
-        setTimeout(() => $showExportModal.set(true), 500);
-      }
-    });
+    }).catch(() => {});
   }
 </script>
