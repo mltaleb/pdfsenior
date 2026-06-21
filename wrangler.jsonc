@@ -1,0 +1,9 @@
+{
+  "name": "pdfsenior",
+  "compatibility_date": "2025-06-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "./dist/_worker.js",
+  "assets": {
+    "directory": "./dist"
+  }
+}
